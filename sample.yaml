@@ -1,0 +1,9 @@
+"baseurl": "https://gitlab.aslead.cloud"
+"id": "406"
+"token": "TzDH9wHp-Mjcm9AEpHUs"
+"type": "project"
+"variables":
+- "key": "HOGE"
+  "value": "hoge"
+- "key": "FUGA"
+  "value": "fuga"
