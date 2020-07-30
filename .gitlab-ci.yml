@@ -8,4 +8,4 @@ setup_job:
     script: 
         - pwd
         - ls
-        - ./gvctl setup -f sample.yaml
+        - gvctl setup -f sample.yaml
