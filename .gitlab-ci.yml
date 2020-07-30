@@ -1,0 +1,10 @@
+image: danish9966/gvctl-alpine:0.1.0
+
+stages:
+    - setup
+
+setup_job:
+    stage: setup
+    script: 
+        - ls
+        - ./gvctl setup -f sample.yaml
