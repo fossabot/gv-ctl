@@ -6,5 +6,6 @@ stages:
 setup_job:
     stage: setup
     script: 
+        - pwd
         - ls
         - ./gvctl setup -f sample.yaml
