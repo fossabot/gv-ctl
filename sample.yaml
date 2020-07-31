@@ -1,6 +1,6 @@
-"baseurl": "https://gitlab.aslead.cloud"
-"id": "406"
-"token": "TzDH9wHp-Mjcm9AEpHUs"
+"baseurl": "https://gitlab.example.com"
+"id": "1"
+"token": "XXXXXXXXXXXXXXXXXx"
 "type": "project"
 "variables":
 - "key": "HOGE"
