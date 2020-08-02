@@ -35,22 +35,42 @@ var setupCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		//変数をすべて削除
 		ID := manifest.ID
-		if err = deleteVariables(client, ID); err != nil {
-			log.Fatal(err)
-			os.Exit(1)
-		}
 
-		for _, v := range manifest.Variables {
-			err := createVariables(client, v, ID)
-			if err != nil {
+		if manifest.type == "project" {
+			if err = deleteProjectVariables(client, ID); err != nil {
+				log.Fatal(err)
+				os.Exit(1)
+			}
+	
+			for _, v := range manifest.Variables {
+				err := createProjectVariables(client, v, ID)
+				if err != nil {
+					log.Fatal(err)
+					os.Exit(1)
+				}
+	
+				logMessage := fmt.Sprintf("[Info] Set Succeed. ProjectID: %s, Key: %s, Value: %s", ID, v.Key, v.Value)
+				log.Println(logMessage)
+			}
+		} else if manifest.type == "group" {
+			if err = deleteGroupVariables(client, ID); err != nil;{
 				log.Fatal(err)
 				os.Exit(1)
 			}
 
-			logMessage := fmt.Sprintf("[Info] Set Succeed. ProjectID: %s, Key: %s, Value: %s", ID, v.Key, v.Value)
-			log.Println(logMessage)
+			for _, v := range manifest.variables {
+				err := createGroupVariables(client, v, ID)
+				if err != nil {
+					log.Fatal(err)
+					os.Exit(1)
+				}
+
+				logMessage := fmt.Sprintf("[Info] Set Succeed. GroupID: %s, Key: %s, Value: %s", ID, v.Key, v.Value)
+				log.Println(logMessage)
+			}
+		} else {
+			logMessage := fmt.Sprintf("[Fatal] Enter the appropriate value in %s (type)", filePath)
 		}
 	},
 }
@@ -60,7 +80,10 @@ func init() {
 	rootCmd.AddCommand(setupCmd)
 }
 
-func createVariables(client *gitlab.Client, v Variable, ID string) (err error) {
+
+
+
+func createProjectVariables(client *gitlab.Client, v Variable, ID string) (err error) {
 	var vtype gitlab.VariableTypeValue = "env_var"
 	variable := &gitlab.CreateProjectVariableOptions{
 		Key:          &v.Key,
@@ -76,7 +99,7 @@ func createVariables(client *gitlab.Client, v Variable, ID string) (err error) {
 	return nil
 }
 
-func deleteVariables(client *gitlab.Client, ID string) (err error) {
+func deleteProjectVariables(client *gitlab.Client, ID string) (err error) {
 	currentVariables, _, err := client.ProjectVariables.ListVariables(ID, nil, nil)
 	if err != nil {
 		return err
@@ -84,6 +107,37 @@ func deleteVariables(client *gitlab.Client, ID string) (err error) {
 	for _, v := range currentVariables {
 		_, err = client.ProjectVariables.RemoveVariable(ID, v.Key, nil)
 		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+
+func createGroupVariables(client *gitlab.Client, v Variable, ID string) (err error) {
+	var vtype gitlab.VariableTypeValue = "env_var"
+	variable := &gitlab.CreateGroupVariableOptions{
+		Key:          &v.Key,
+		Value:        &v.Value,
+		VariableType: &vtype,
+		Protected:    &v.Protected,
+		Masked:       &v.Masked,
+	}
+	_, _, err := client.GroupVariables.CreateVariable(ID, variable, nil)
+	if err != nil{
+		return err
+	}
+	return err
+}
+
+func deleteGroupVariables(client *gitlab.Client, ID String) (err error) {
+	currentVariables, _, err := client.GroupVariables.ListVariables(ID, nil, nil)
+	if err != nil {
+		return err
+	}
+	for _, v:= range currentVariables {
+		_, err = client.GroupVariables.RemoveVariable(ID, v.Key, nil)
+		if err != nil{
 			return err
 		}
 	}
