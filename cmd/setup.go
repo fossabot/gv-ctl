@@ -37,7 +37,7 @@ var setupCmd = &cobra.Command{
 		}
 		ID := manifest.ID
 
-		if manifest.type == "project" {
+		if manifest.Type == "project" {
 			if err = deleteProjectVariables(client, ID); err != nil {
 				log.Fatal(err)
 				os.Exit(1)
@@ -53,13 +53,13 @@ var setupCmd = &cobra.Command{
 				logMessage := fmt.Sprintf("[Info] Set Succeed. ProjectID: %s, Key: %s, Value: %s", ID, v.Key, v.Value)
 				log.Println(logMessage)
 			}
-		} else if manifest.type == "group" {
-			if err = deleteGroupVariables(client, ID); err != nil;{
+		} else if manifest.Type == "group" {
+			if err = deleteGroupVariables(client, ID); err != nil {
 				log.Fatal(err)
 				os.Exit(1)
 			}
 
-			for _, v := range manifest.variables {
+			for _, v := range manifest.Variables {
 				err := createGroupVariables(client, v, ID)
 				if err != nil {
 					log.Fatal(err)
@@ -71,6 +71,7 @@ var setupCmd = &cobra.Command{
 			}
 		} else {
 			logMessage := fmt.Sprintf("[Fatal] Enter the appropriate value in %s (type)", filePath)
+			log.Println(logMessage)
 		}
 	},
 }
@@ -123,23 +124,29 @@ func createGroupVariables(client *gitlab.Client, v Variable, ID string) (err err
 		Protected:    &v.Protected,
 		Masked:       &v.Masked,
 	}
-	_, _, err := client.GroupVariables.CreateVariable(ID, variable, nil)
+	_, _, err = client.GroupVariables.CreateVariable(ID, variable, nil)
 	if err != nil{
 		return err
 	}
 	return err
 }
 
-func deleteGroupVariables(client *gitlab.Client, ID String) (err error) {
-	currentVariables, _, err := client.GroupVariables.ListVariables(ID, nil, nil)
+func deleteGroupVariables(client *gitlab.Client, ID string) (err error) {
+	groupVariablesOptions := &gitlab.ListGroupVariablesOptions{}
+	groupVariablesOptions.PerPage = 100
+	currentVariables, _, err := client.GroupVariables.ListVariables(ID, groupVariablesOptions, nil)
 	if err != nil {
 		return err
 	}
+	fmt.Println(len(currentVariables))
 	for _, v:= range currentVariables {
 		_, err = client.GroupVariables.RemoveVariable(ID, v.Key, nil)
 		if err != nil{
 			return err
 		}
+		logMessage := fmt.Sprintf("[Info] Remove Succeed. GroupID: %s, Key: %s", ID, v.Key)
+		log.Println(logMessage)
+
 	}
 	return nil
 }
