@@ -101,7 +101,8 @@ func createProjectVariables(client *gitlab.Client, v Variable, ID string) (err e
 }
 
 func deleteProjectVariables(client *gitlab.Client, ID string) (err error) {
-	currentVariables, _, err := client.ProjectVariables.ListVariables(ID, nil, nil)
+	projectVariablesOptions := &gitlab.ListProjectVariablesOptions{PerPage: 100}
+	currentVariables, _, err := client.ProjectVariables.ListVariables(ID, projectVariablesOptions, nil)
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,6 @@ func deleteGroupVariables(client *gitlab.Client, ID string) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println(len(currentVariables))
 	for _, v:= range currentVariables {
 		_, err = client.GroupVariables.RemoveVariable(ID, v.Key, nil)
 		if err != nil{
